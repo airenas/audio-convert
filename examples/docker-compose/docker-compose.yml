@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  audio-convert:
+    image: airenas/audio-convert-service:${VERSION}
+    ports:
+      - "${PORT}:8000"
+    # restart: unless-stopped
+
+ 

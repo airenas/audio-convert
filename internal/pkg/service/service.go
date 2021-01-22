@@ -34,6 +34,8 @@ type (
 
 		Saver FileSaver
 		Coder Encoder
+
+		readFunc func(string) ([]byte, error)
 	}
 )
 
@@ -41,6 +43,16 @@ type (
 func StartWebServer(data *Data) error {
 	goapp.Log.Infof("Starting HTTP audio convert service at %d", data.Port)
 	portStr := strconv.Itoa(data.Port)
+	data.readFunc = ioutil.ReadFile
+	e := initRoutes(data)
+
+	if err := e.Start(":" + portStr); err != nil {
+		return errors.Wrap(err, "Can't start HTTP listener at port "+portStr)
+	}
+	return nil
+}
+
+func initRoutes(data *Data) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	p := prometheus.NewPrometheus("echo", nil)
@@ -53,11 +65,7 @@ func StartWebServer(data *Data) error {
 	for _, r := range e.Routes() {
 		goapp.Log.Infof("  %s %s", r.Method, r.Path)
 	}
-	err := e.Start(":" + portStr)
-	if err != nil {
-		return errors.Wrap(err, "Can't start HTTP listener at port "+portStr)
-	}
-	return nil
+	return e
 }
 
 type input struct {
@@ -100,7 +108,7 @@ func convert(data *Data) func(echo.Context) error {
 		}
 		defer deleteFile(fileNameOut)
 
-		fd, err := ioutil.ReadFile(fileNameOut)
+		fd, err := data.readFunc(fileNameOut)
 		if err != nil {
 			goapp.Log.Error(err)
 			return errors.Wrap(err, "Can not read file")
@@ -118,7 +126,7 @@ func deleteFile(file string) {
 
 func validate(r *input) error {
 	if !(getFormat(r.Format) == "mp3" || getFormat(r.Format) == "m4a") {
-		return errors.Errorf("Unsuported format %s", r.Format)
+		return errors.Errorf("Unsuported format '%s'", r.Format)
 	}
 	if r.Data == "" {
 		return errors.Errorf("No Audio")

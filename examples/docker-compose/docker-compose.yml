@@ -5,6 +5,7 @@ services:
     image: airenas/audio-convert-service:${VERSION}
     ports:
       - "${PORT}:8000"
+    # shm_size: '2gb'  
     # restart: unless-stopped
 
  

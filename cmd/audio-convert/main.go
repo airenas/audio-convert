@@ -15,6 +15,7 @@ func main() {
 	data.Port = goapp.Config.GetInt("port")
 
 	var err error
+	goapp.Log.Infof("Temp dir: %s", goapp.Config.GetString("tempDir"))
 	data.Saver, err = file.NewSaver(goapp.Config.GetString("tempDir"))
 	if err != nil {
 		goapp.Log.Fatal(errors.Wrap(err, "Can't init file saver"))

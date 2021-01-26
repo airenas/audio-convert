@@ -80,6 +80,7 @@ type output struct {
 
 func convert(data *Data) func(echo.Context) error {
 	return func(c echo.Context) error {
+		defer goapp.Estimate("Service method")()
 		r := new(input)
 		if err := c.Bind(r); err != nil {
 			goapp.Log.Error(err)
@@ -94,6 +95,7 @@ func convert(data *Data) func(echo.Context) error {
 		id := uuid.New().String()
 		fileName := id + ".wav"
 
+		est := goapp.Estimate("Saving")
 		reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(r.Data))
 		fileNameIn, err := data.Saver.Save(fileName, reader)
 		if err != nil {
@@ -101,20 +103,29 @@ func convert(data *Data) func(echo.Context) error {
 			return errors.Wrap(err, "Can not save file")
 		}
 		defer deleteFile(fileNameIn)
+		est()
+
+		est = goapp.Estimate("Convert")
 		fileNameOut, err := data.Coder.Convert(fileNameIn, getFormat(r.Format), r.Metadata)
 		if err != nil {
 			goapp.Log.Error(err)
 			return errors.Wrap(err, "Can not encode file")
 		}
 		defer deleteFile(fileNameOut)
+		est()
 
+		est = goapp.Estimate("Read")
 		fd, err := data.readFunc(fileNameOut)
 		if err != nil {
 			goapp.Log.Error(err)
 			return errors.Wrap(err, "Can not read file")
 		}
+		est()
+
+		est = goapp.Estimate("Decode")
 		res := &output{}
 		res.Data = base64.StdEncoding.EncodeToString(fd)
+		est()
 
 		return c.JSON(http.StatusOK, res)
 	}

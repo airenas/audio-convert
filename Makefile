@@ -22,10 +22,10 @@ run:
 	cd cmd/audio-convert/ && go run . -c config.yml	
 #####################################################################################
 docker/build:
-	cd deploy && $(MAKE) clean dbuild	
+	cd build && $(MAKE) clean dbuild	
 #####################################################################################
 docker/push:
-	cd deploy && $(MAKE) clean dpush
+	cd build && $(MAKE) clean dpush
 #####################################################################################
 ## clean temporary docker build artifacts
 clean:

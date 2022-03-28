@@ -4,12 +4,15 @@ import (
 	"encoding/base64"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/airenas/go-app/pkg/goapp"
+	"github.com/facebookgo/grace/gracehttp"
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
@@ -46,10 +49,17 @@ func StartWebServer(data *Data) error {
 	data.readFunc = ioutil.ReadFile
 	e := initRoutes(data)
 
-	if err := e.Start(":" + portStr); err != nil {
-		return errors.Wrap(err, "Can't start HTTP listener at port "+portStr)
-	}
-	return nil
+	e.Server.Addr = ":" + portStr
+	e.Server.IdleTimeout = 3 * time.Minute
+	e.Server.ReadHeaderTimeout = 15 * time.Second
+	e.Server.ReadTimeout = 180 * time.Second
+	e.Server.WriteTimeout = 270 * time.Second
+
+	w := goapp.Log.Writer()
+	defer w.Close()
+	gracehttp.SetLogger(log.New(w, "", 0))
+
+	return gracehttp.Serve(e.Server)
 }
 
 func initRoutes(data *Data) *echo.Echo {

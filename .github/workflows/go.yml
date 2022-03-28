@@ -41,6 +41,9 @@ jobs:
     - name: Build docker
       run: make docker/build
 
+    - name: Scan docker
+      run: make docker/scan   
+
     - name: Calc coverage
       run: |
         go test -v -covermode=count -coverprofile=coverage.out ./...

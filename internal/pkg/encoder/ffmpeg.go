@@ -26,6 +26,7 @@ func NewFFMpeg() (*FFMpeg, error) {
 func (e *FFMpeg) Convert(nameIn string, format string, metadata []string) (string, error) {
 	resName := getNewFile(nameIn, format)
 	params := []string{"ffmpeg", "-i", nameIn}
+	params = append(params, getQualityParams(format)...)
 	params = append(params, getMetadataParams(metadata)...)
 	params = append(params, resName)
 	err := e.convertFunc(params)
@@ -42,7 +43,7 @@ func runCmd(cmdArr []string) error {
 	cmd.Stderr = &outputBuffer
 	err := cmd.Run()
 	if err != nil {
-		return errors.Wrap(err, "Output: "+string(outputBuffer.Bytes()))
+		return errors.Wrap(err, "Output: "+outputBuffer.String())
 	}
 	return nil
 }
@@ -63,4 +64,11 @@ func getMetadataParams(prm []string) []string {
 		}
 	}
 	return res
+}
+
+func getQualityParams(format string) []string {
+	if format == "mp3" {
+		return []string{"-q:a", "4"}
+	}
+	return nil
 }

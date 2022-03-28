@@ -23,7 +23,7 @@ func TestFile_Mp3(t *testing.T) {
 		return nil
 	}
 	d, err := encoder.Convert("/dir/file.wav", "mp3", nil)
-	assert.Equal(t, []string{"ffmpeg", "-i", "/dir/file.wav", "/dir/file.wav.mp3"}, s)
+	assert.Equal(t, []string{"ffmpeg", "-i", "/dir/file.wav", "-q:a", "4", "/dir/file.wav.mp3"}, s)
 	assert.Equal(t, "/dir/file.wav.mp3", d)
 	assert.Nil(t, err)
 }
@@ -72,4 +72,17 @@ func TestMetadata_Several(t *testing.T) {
 	encoder.Convert("file.wav", "m4a", []string{"a=aaaa", "b=b and c"})
 	assert.Equal(t, []string{"ffmpeg", "-i", "file.wav", "-metadata",
 		"a=aaaa", "-metadata", "b=b and c", "file.wav.m4a"}, s)
+}
+
+func TestMetadata_Mp3(t *testing.T) {
+	initTest(t)
+	var s []string
+	encoder.convertFunc = func(cmd []string) error {
+		s = cmd
+		return nil
+	}
+	encoder.Convert("file.wav", "mp3", []string{"a=aaaa"})
+	assert.Equal(t, []string{"ffmpeg", "-i", "file.wav",
+		"-q:a", "4",
+		"-metadata", "a=aaaa", "file.wav.mp3"}, s)
 }

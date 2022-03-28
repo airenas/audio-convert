@@ -38,6 +38,9 @@ jobs:
     - name: Run vet & lint
       run: make test/lint
 
+    - name: Build docker
+      run: make docker/build
+
     - name: Calc coverage
       run: |
         go test -v -covermode=count -coverprofile=coverage.out ./...

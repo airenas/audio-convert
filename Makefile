@@ -27,7 +27,12 @@ docker/build:
 docker/push:
 	cd build && $(MAKE) dpush
 #####################################################################################
+## scan docker for vulnerabilities
+docker/scan:
+	cd build && $(MAKE) dscan	
+.PHONY: docker/scan		
+#####################################################################################
 ## clean temporary docker build artifacts
 clean:
-	go mod tidy
+	go mod tidy -compat=1.17
 	go clean

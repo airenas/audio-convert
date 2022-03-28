@@ -48,7 +48,7 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         image: airenas/audio-convert-service:latest
-        args: --file=Dockerfile
+        args: --file=build/Dockerfile
 
     - name: Upload snyk result to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v1

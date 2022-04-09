@@ -18,7 +18,7 @@ COPY . /go/src
 
 RUN CGO_ENABLED=0 go build -o /go/bin/audio-convert -ldflags "-X main.version=$BUILD_VERSION" cmd/audio-convert/main.go
 #####################################################################################
-FROM alpine:3.13.8 as runner
+FROM alpine:3.14.6 as runner
 
 ARG BUILD_VERSION=0.1
 
